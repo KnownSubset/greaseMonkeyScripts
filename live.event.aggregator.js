@@ -7,19 +7,24 @@
 // ==/UserScript==
 unsafeWindow.myScript = this;
 
+var hiddenElements = new Array();
 $(document).ready(function(){
 	var header = $('div#c_header ul.c_ht');
     header.append('<li><a id="timesheetFormatter" class="uxfa_ml c_ml">Timesheet</a></li>');
     var timesheetLink = header.find("a#timesheetFormatter");
     timesheetLink.click(function (){
+        var agendaHeader = $('div#agendaHeader');
         var agendaContent = $('div#calendarAgendaView div#agendaContent');
         var eventsForEachDay = agendaContent.find('ol.avList');
+        var spanTotal = 0;
         eventsForEachDay.each(function(){
             var day = $(this);
             var theEventsOfTheDay = day.find('li.avEvt');
             var total=0;
             theEventsOfTheDay.each(function (){
-                $(this).find('.avEvtCalTD, .Charm.buttonRest').remove();
+                var elements = $(this).find('.avEvtCalTD,.Charm.buttonRest,.avEvtExpandoTD');
+                elements.hide();
+                hiddenElements = hiddenElements.concat(elements);
                 var eventInfo = $(this).find('table.avWhatTable td a.avEvtWhat').text();
                 var timeStartIndex = eventInfo.indexOf('(', eventInfo.length - 10 );
                 var info = eventInfo.substr(0, timeStartIndex);
@@ -33,8 +38,13 @@ $(document).ready(function(){
             });
             var dayHeader = day.prev().find('h3');
             dayHeader.append("  (" + parseInt(total) + "h " + (total - parseInt(total)) * 60 + "m)");
+            spanTotal += total;
 
         });
+        agendaHeader.find('div.agendaRange').append("<h3>(" + parseInt(spanTotal) + "h " + (spanTotal - parseInt(spanTotal)) * 60 + "m)</h3>");
+        var items = agendaHeader.find('div#ns1_agendaActions,span.c_chev,.avRangeDatePicker');
+        items.hide();
+        hiddenElements = hiddenElements.concat(items);
     });
 
 });
